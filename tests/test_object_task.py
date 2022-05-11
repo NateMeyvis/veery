@@ -1,5 +1,3 @@
-import pytest
-
 from objects.task import Task
 
 def test_basic_task_creation():
