@@ -3,13 +3,13 @@ import tempfile
 import pytest
 
 from objects.task import Task
-from repositories.task_repository import TaskRepository
+from repositories.task_repository import TextFileTaskRepository
 
 
 @pytest.fixture
 def repo():
     with tempfile.NamedTemporaryFile() as f:
-        return TaskRepository(path=f.name)
+        return TextFileTaskRepository(path=f.name)
 
 
 def test_repo_smoke(repo):

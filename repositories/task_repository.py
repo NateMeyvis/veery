@@ -1,9 +1,29 @@
+from abc import ABC, abstractmethod
+
 from typing import List
 
 from objects.task import Task
 
 
-class TaskRepository:
+class TaskRepository(ABC):
+    @abstractmethod
+    def get_all_tasks(self) -> List[Task]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def set_task_list(self, tasks: List[Task]):
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_task(self, new_task: Task):
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_task(self, task_to_remove: Task):
+        raise NotImplementedError
+
+
+class TextFileTaskRepository(TaskRepository):
     def __init__(self, path: str):
         self._path = path
 
@@ -19,12 +39,16 @@ class TaskRepository:
         tasks = []
         with open(self._path) as f:
             for task_line in f.readlines():
-                tasks.append(TaskRepository.task_from_string(task_line.strip()))
+                tasks.append(TextFileTaskRepository.task_from_string(task_line.strip()))
         return tasks
 
     def set_task_list(self, tasks: List[Task]):
         with open(self._path, "w") as f:
-            f.write("\n".join([TaskRepository.task_to_string(task) for task in tasks]))
+            f.write(
+                "\n".join(
+                    [TextFileTaskRepository.task_to_string(task) for task in tasks]
+                )
+            )
 
     def add_task(self, new_task: Task):
         task_list = self.get_all_tasks()
