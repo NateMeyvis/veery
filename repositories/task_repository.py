@@ -11,6 +11,10 @@ class TaskRepository:
     def task_from_string(serialized: str) -> Task:
         return Task(description=serialized)
 
+    @staticmethod
+    def task_to_string(to_serialize: Task) -> str:
+        return to_serialize.description
+
     def get_all_tasks(self):
         tasks = []
         with open(self._path) as f:
@@ -20,7 +24,7 @@ class TaskRepository:
 
     def set_task_list(self, tasks: List[Task]):
         with open(self._path, "w") as f:
-            f.write("\n".join([str(task) for task in tasks]))
+            f.write("\n".join([TaskRepository.task_to_string(task) for task in tasks]))
 
     def add_task(self, new_task: Task):
         task_list = self.get_all_tasks()
