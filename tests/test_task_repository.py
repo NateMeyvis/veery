@@ -16,20 +16,18 @@ def test_repo_smoke(repo):
     assert repo
 
 
-def test_setting(repo):
-    tasks = [Task("Do a thing"), Task("do another thing"), Task("do yet another thing")]
+def test_setting(repo, tasks):
     repo.set_task_list(tasks)
     retrieved = repo.get_all_tasks()
     assert set(tasks) == set(retrieved)
 
 
-def test_removal(repo):
+def test_removal(repo, tasks):
     # Create a repository with some tasks.
-    tasks = [Task("Do a thing"), Task("do another thing"), Task("do yet another thing")]
     repo.set_task_list(tasks)
 
     # Remove one of them.
-    task_to_remove = Task("do another thing")
+    task_to_remove = Task("do another thing") # One of the task descriptions from conftest.py.
     repo.remove_task(task_to_remove)
 
     # Make sure it's gone
