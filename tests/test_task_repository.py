@@ -1,3 +1,4 @@
+from datetime import datetime
 import tempfile
 
 import pytest
@@ -40,6 +41,8 @@ def test_removal(repo, tasks):
         [],  # Test empty initial task list
         [Task("foo")],
         [Task("foo"), Task("bar"), Task("baz")],
+        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz")],
+        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))],
     ],
 )
 def test_addition(repo, initial_tasks):

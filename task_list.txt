@@ -1,5 +1,5 @@
-Move shelves
-Move air conditioner
-Empty dishwasher
-Make dinner
-Publish blog post
+Move shelves,NONE
+Move air conditioner,NONE
+Empty dishwasher,NONE
+Make dinner,NONE
+Publish blog post,NONE

@@ -10,8 +10,4 @@ class Task:
     due: Optional[datetime] = None
 
     def __str__(self):
-        return self.description
-
-    @staticmethod
-    def from_string(raw_string: str):
-        return Task(description=raw_string)
+        return f"{self.description}: {'no due date' if self.due is None else self.due.isoformat()}"

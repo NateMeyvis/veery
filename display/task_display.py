@@ -6,7 +6,7 @@ def task_ordered_list(tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
     result = "<ol>"
     for task in tasks:
-        result += f"<li>{task.description}</li>"
+        result += f"<li>{str(task)}</li>"
     result += "</ol>"
     return result
 

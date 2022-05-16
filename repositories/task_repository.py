@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
-from typing import List
+from typing import List, Optional
 
 from objects.task import Task
 
@@ -24,16 +25,36 @@ class TaskRepository(ABC):
 
 
 class TextFileTaskRepository(TaskRepository):
+    EMPTY_DUE_DATETIME_INDICATOR = "NONE"
+    SEPARATOR = ','
+
     def __init__(self, path: str):
         self._path = path
+    
+    @staticmethod
+    def _task_due_from_string(serialized: str) -> Optional[datetime]:
+        if serialized == TextFileTaskRepository.EMPTY_DUE_DATETIME_INDICATOR:
+            return None
+        else:
+            return datetime.fromisoformat(serialized)
 
     @staticmethod
     def task_from_string(serialized: str) -> Task:
-        return Task(description=serialized)
+        separated = serialized.split(TextFileTaskRepository.SEPARATOR)
+        due = TextFileTaskRepository._task_due_from_string(separated[-1])
+        description = TextFileTaskRepository.SEPARATOR.join(separated[:-1])
+        return Task(description=description, due=due)
+
+    @staticmethod
+    def _task_due_to_string(due_datetime: Optional[datetime]) -> str:
+        if due_datetime is None:
+            return TextFileTaskRepository.EMPTY_DUE_DATETIME_INDICATOR
+        else:
+            return due_datetime.isoformat()
 
     @staticmethod
     def task_to_string(to_serialize: Task) -> str:
-        return to_serialize.description
+        return f"{to_serialize.description}{TextFileTaskRepository.SEPARATOR}{TextFileTaskRepository._task_due_to_string(to_serialize.due)}"
 
     def get_all_tasks(self):
         tasks = []
