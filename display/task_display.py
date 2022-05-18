@@ -10,6 +10,11 @@ def task_ordered_list(tasks: List[Task]) -> str:
     result += "</ol>"
     return result
 
+def add_task_form() -> str:
+    return """<form action="/add" method="post">
+        Description: <input type="text" name="description" />
+    </form>"""
+
 def task_display(tasks: List[Task]) -> str:
     """Given a list of tasks, return HTML to display them."""
     return f"""
@@ -19,6 +24,8 @@ def task_display(tasks: List[Task]) -> str:
         <head>
         <body>
             {task_ordered_list(tasks)}
+            <br>
+            {add_task_form()}
         </body>
         </html>
     """

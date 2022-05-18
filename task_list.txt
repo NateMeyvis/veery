@@ -3,3 +3,4 @@ Move air conditioner,NONE
 Empty dishwasher,NONE
 Make dinner,NONE
 Publish blog post,NONE
+Implement due-date entry,NONE
