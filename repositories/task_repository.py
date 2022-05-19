@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from uuid import UUID
 
 from typing import List, Optional
 
@@ -42,8 +43,9 @@ class TextFileTaskRepository(TaskRepository):
     def task_from_string(serialized: str) -> Task:
         separated = serialized.split(TextFileTaskRepository.SEPARATOR)
         due = TextFileTaskRepository._task_due_from_string(separated[-1])
-        description = TextFileTaskRepository.SEPARATOR.join(separated[:-1])
-        return Task(description=description, due=due)
+        uuid = UUID(separated[-2])
+        description = TextFileTaskRepository.SEPARATOR.join(separated[:-2])
+        return Task(description=description, due=due, uuid=uuid)
 
     @staticmethod
     def _task_due_to_string(due_datetime: Optional[datetime]) -> str:
@@ -54,7 +56,7 @@ class TextFileTaskRepository(TaskRepository):
 
     @staticmethod
     def task_to_string(to_serialize: Task) -> str:
-        return f"{to_serialize.description}{TextFileTaskRepository.SEPARATOR}{TextFileTaskRepository._task_due_to_string(to_serialize.due)}"
+        return TextFileTaskRepository.SEPARATOR.join([to_serialize.description, to_serialize.uuid.hex, TextFileTaskRepository._task_due_to_string(to_serialize.due)])
 
     def get_all_tasks(self):
         tasks = []

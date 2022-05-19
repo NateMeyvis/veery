@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from uuid import UUID, uuid4
 
 from typing import Optional
 
@@ -17,6 +18,7 @@ class Task:
     description: str
     due: Optional[datetime] = None
     status: CompletionStatus = CompletionStatus.OUTSTANDING
+    uuid: UUID = field(default_factory=uuid4)
 
     def _due_description(self):
         return '' if self.due is None else self.due.isoformat()
@@ -24,5 +26,8 @@ class Task:
     def _completion_status_description(self):
         return self.status.name
 
+    def _description_stub(self):
+        return self.description[:10]
+
     def __str__(self):
-        return f"{self.description}: {self._due_description()} ({self._completion_status_description})"
+        return f"Task {self.uuid.hex}: {self.description}. {self._due_description()} ({self._completion_status_description})"
