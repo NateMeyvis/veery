@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bottle import redirect, request, route, run
 
 from display.task_display import task_display
@@ -17,8 +19,8 @@ def add_task(task_repository: TaskRepository = repo):
 @route("/add", method="POST")
 def proc_add_task(task_repository: TaskRepository = repo):
     description = request.forms.get('description')
-    due = None
-    task_repository.add_task(Task(description))
+    due = datetime.fromisoformat(request.forms.get('due'))
+    task_repository.add_task(Task(description=description, due=due))
     redirect("/add")
 
 run(host="0.0.0.0", port=8000)

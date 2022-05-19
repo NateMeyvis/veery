@@ -13,6 +13,8 @@ def task_ordered_list(tasks: List[Task]) -> str:
 def add_task_form() -> str:
     return """<form action="/add" method="post">
         Description: <input type="text" name="description" />
+        <br>
+        Due (leave blank for None): <input type="datetime-local" name="due" />
     </form>"""
 
 def task_display(tasks: List[Task]) -> str:
