@@ -13,7 +13,7 @@ class CompletionStatus(Enum):
     WONT_DO = 3
 
 
-@dataclass(frozen=True)
+@dataclass
 class Task:
     description: str
     due: Optional[datetime] = None
@@ -30,4 +30,7 @@ class Task:
         return self.description[:10]
 
     def __str__(self):
-        return f"Task {self.uuid.hex}: {self.description}. {self._due_description()} ({self._completion_status_description})"
+        return f"{self.uuid.hex}: {self.description}. {self._due_description()}"
+
+    def __eq__(self, other):
+        return self.uuid == other.uuid

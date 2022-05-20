@@ -28,6 +28,10 @@ class TaskRepository(ABC):
     def remove_task(self, task_to_remove: Task):
         raise NotImplementedError
 
+    @abstractmethod
+    def update_task(self, task_to_update: Task):
+        raise NotImplementedError
+
 
 class TextFileTaskRepository(TaskRepository):
     EMPTY_DUE_DATETIME_INDICATOR = "NONE"
@@ -92,3 +96,10 @@ class TextFileTaskRepository(TaskRepository):
         task_list = self.get_all_tasks()
         task_list = [task for task in task_list if task != task_to_remove]
         self.set_task_list(task_list)
+
+    def update_task(self, task_to_update: Task):
+        retrieved = self.retrieve_task_by_uuid(task_to_update.uuid)
+        if retrieved is None:
+            raise ValueError(f"Cannot update task {task_to_update}: no task with its UUID exists.")
+        self.remove_task(retrieved)
+        self.add_task(task_to_update)

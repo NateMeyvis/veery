@@ -20,7 +20,9 @@ def test_repo_smoke(repo):
 def test_setting(repo, tasks):
     repo.set_task_list(tasks)
     retrieved = repo.get_all_tasks()
-    assert set(tasks) == set(retrieved)
+    for task in tasks:
+        assert task in retrieved
+    assert len(retrieved) == len(tasks) # No extras in retrieved
 
 
 def test_removal(repo, tasks):
@@ -88,3 +90,15 @@ def test_attempted_retrieval_returns_none_on_failed_search(repo, initial_tasks):
     repo.set_task_list(initial_tasks)
     new_task = Task("foo_description")
     assert repo.retrieve_task_by_uuid(new_task.uuid) is None
+
+@pytest.mark.parametrize("new_due", [None, datetime(2022, 1, 2, 4, 5, 6)])
+@pytest.mark.parametrize("new_description", ["foo", "bar", "baz", "Qux!!!!!"])
+def test_update(repo, tasks, new_due, new_description):
+    repo.set_task_list(tasks)
+    task_to_modify = tasks[0]
+    task_to_modify.description = new_description
+    task_to_modify.due = new_due
+    repo.update_task(task_to_modify)
+    retrieved = repo.retrieve_task_by_uuid(task_to_modify.uuid)
+    assert retrieved.description == new_description
+    assert retrieved.due == new_due

@@ -19,7 +19,7 @@ def add_task(task_repository: TaskRepository = repo):
 @route("/add", method="POST")
 def proc_add_task(task_repository: TaskRepository = repo):
     description = request.forms.get('description')
-    due = datetime.fromisoformat(request.forms.get('due'))
+    due = datetime.fromisoformat(request.forms.get('due')) if request.forms.get('due') else None
     task_repository.add_task(Task(description=description, due=due))
     redirect("/add")
 
