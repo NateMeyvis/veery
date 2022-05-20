@@ -21,6 +21,10 @@ class TaskRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def retrieve_task_by_uuid(self, uuid: UUID) -> Optional[Task]:
+        raise NotImplementedError
+
+    @abstractmethod
     def remove_task(self, task_to_remove: Task):
         raise NotImplementedError
 
@@ -64,6 +68,12 @@ class TextFileTaskRepository(TaskRepository):
             for task_line in f.readlines():
                 tasks.append(TextFileTaskRepository.task_from_string(task_line.strip()))
         return tasks
+
+    def retrieve_task_by_uuid(self, uuid: UUID) -> Optional[Task]:
+        for task in self.get_all_tasks():
+            if task.uuid == uuid:
+                return task
+        return None
 
     def set_task_list(self, tasks: List[Task]):
         with open(self._path, "w") as f:
