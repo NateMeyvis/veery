@@ -33,4 +33,9 @@ class Task:
         return f"{self.uuid.hex}: {self.description}. {self._due_description()}"
 
     def __eq__(self, other):
-        return self.uuid == other.uuid
+        return all(
+            [self.uuid == other.uuid,
+            self.status == other.status,
+            self.due == other.due,
+            self.description == other.description]
+        )

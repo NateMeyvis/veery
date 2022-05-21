@@ -50,6 +50,7 @@ class TextFileTaskRepository(TaskRepository):
     @staticmethod
     def task_from_string(serialized: str) -> Task:
         separated = serialized.split(TextFileTaskRepository.SEPARATOR)
+        assert len(separated) >= 4
         status = CompletionStatus(int(separated[-1]))
         due = TextFileTaskRepository._task_due_from_string(separated[-2])
         uuid = UUID(separated[-3])
