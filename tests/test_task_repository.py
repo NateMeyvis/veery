@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 
-from objects.task import Task
+from objects.task import CompletionStatus, Task
 from repositories.task_repository import TextFileTaskRepository
 
 
@@ -74,6 +74,7 @@ def test_retrieval_when_repository_does_not_have_other_tasks(repo, task_to_retri
     repo.set_task_list([])
     uuid_to_search = task_to_retrieve.uuid
     repo.add_task(task_to_retrieve)
+    # TODO(nwm): Fix things here.
     assert repo.retrieve_task_by_uuid(uuid_to_search) == task_to_retrieve
 
 @pytest.mark.parametrize(
@@ -91,9 +92,10 @@ def test_attempted_retrieval_returns_none_on_failed_search(repo, initial_tasks):
     new_task = Task("foo_description")
     assert repo.retrieve_task_by_uuid(new_task.uuid) is None
 
+@pytest.mark.parametrize("new_status", [CompletionStatus.COMPLETED, CompletionStatus.WONT_DO])
 @pytest.mark.parametrize("new_due", [None, datetime(2022, 1, 2, 4, 5, 6)])
 @pytest.mark.parametrize("new_description", ["foo", "bar", "baz", "Qux!!!!!"])
-def test_update(repo, tasks, new_due, new_description):
+def test_update(repo, tasks, new_due, new_description, new_status):
     repo.set_task_list(tasks)
     task_to_modify = tasks[0]
     task_to_modify.description = new_description

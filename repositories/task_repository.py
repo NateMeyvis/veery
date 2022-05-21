@@ -4,7 +4,7 @@ from uuid import UUID
 
 from typing import List, Optional
 
-from objects.task import Task
+from objects.task import CompletionStatus, Task
 
 
 class TaskRepository(ABC):
@@ -50,10 +50,11 @@ class TextFileTaskRepository(TaskRepository):
     @staticmethod
     def task_from_string(serialized: str) -> Task:
         separated = serialized.split(TextFileTaskRepository.SEPARATOR)
-        due = TextFileTaskRepository._task_due_from_string(separated[-1])
-        uuid = UUID(separated[-2])
-        description = TextFileTaskRepository.SEPARATOR.join(separated[:-2])
-        return Task(description=description, due=due, uuid=uuid)
+        status = CompletionStatus(int(separated[-1]))
+        due = TextFileTaskRepository._task_due_from_string(separated[-2])
+        uuid = UUID(separated[-3])
+        description = TextFileTaskRepository.SEPARATOR.join(separated[:-3])
+        return Task(description=description, due=due, uuid=uuid, status=status)
 
     @staticmethod
     def _task_due_to_string(due_datetime: Optional[datetime]) -> str:
@@ -64,7 +65,7 @@ class TextFileTaskRepository(TaskRepository):
 
     @staticmethod
     def task_to_string(to_serialize: Task) -> str:
-        return TextFileTaskRepository.SEPARATOR.join([to_serialize.description, to_serialize.uuid.hex, TextFileTaskRepository._task_due_to_string(to_serialize.due)])
+        return TextFileTaskRepository.SEPARATOR.join([to_serialize.description, to_serialize.uuid.hex, TextFileTaskRepository._task_due_to_string(to_serialize.due), str(to_serialize.status.value)])
 
     def get_all_tasks(self):
         tasks = []
