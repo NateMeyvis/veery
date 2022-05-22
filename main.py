@@ -13,11 +13,13 @@ repo = TextFileTaskRepository("task_list.txt")
 
 @route("/")
 def list_tasks(task_repository: TaskRepository = repo):
-    return task_display(task_repository.get_all_tasks())
+    active = [task for task in task_repository.get_all_tasks()
+        if task.status == CompletionStatus.OUTSTANDING]
+    return task_display(active)
 
 @route("/add")
 def add_task(task_repository: TaskRepository = repo):
-    return task_display(task_repository.get_all_tasks())
+    return task_display([task for task in task_repository.get_all_tasks() if task.status == CompletionStatus.OUTSTANDING])
 
 @route("/add", method="POST")
 def proc_add_task(task_repository: TaskRepository = repo):
@@ -26,9 +28,8 @@ def proc_add_task(task_repository: TaskRepository = repo):
     task_repository.add_task(Task(description=description, due=due))
     redirect("/add")
 
-@route("/complete", method="POST")
-def proc_complete_task(task_repository: TaskRepository = repo):
-    uuid_str = request.forms.get('uuid')
+@route("/complete/<uuid_str>", method="POST")
+def proc_complete_task(uuid_str: str, task_repository: TaskRepository = repo):
     mark_complete(task_repository, UUID(uuid_str))
     redirect("/add")
 
