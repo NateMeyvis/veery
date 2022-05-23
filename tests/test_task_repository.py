@@ -1,107 +1,65 @@
 from datetime import datetime
-import tempfile
+import sqlite3
 
 import pytest
 
 from objects.task import CompletionStatus, Task
-from repositories.task_repository import TextFileTaskRepository
+from repositories.task_repository import SQLiteTaskRepository
 
 
 
 @pytest.fixture
 def repo():
-    with tempfile.NamedTemporaryFile() as f:
-        return TextFileTaskRepository(path=f.name)
+    repo = SQLiteTaskRepository(':memory:')
+    repo.connection.cursor().execute(SQLiteTaskRepository.CREATE_SCHEMA)
+    repo.connection.commit()
+    return repo
 
 
 def test_repo_smoke(repo):
     assert repo
 
 
-def test_setting(repo, tasks):
-    repo.set_task_list(tasks)
-    retrieved = repo.get_all_tasks()
-    for task in tasks:
-        assert task in retrieved
-    assert len(retrieved) == len(tasks) # No extras in retrieved
+@pytest.fixture
+def initial_tasks():
+    return [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))]
 
-
-def test_removal(repo, tasks):
-    # Create a repository with some tasks.
-    repo.set_task_list(tasks)
-
-    # Remove one of them.
-    task_to_remove = Task("do another thing") # One of the task descriptions from conftest.py.
-    repo.remove_task(task_to_remove)
-
-    # Make sure it's gone
-    assert not any([task == task_to_remove for task in repo.get_all_tasks()])
-
-
-@pytest.mark.parametrize(
-    "initial_tasks",
-    [
-        [],  # Test empty initial task list
-        [Task("foo")],
-        [Task("foo"), Task("bar"), Task("baz")],
-        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz")],
-        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))],
-    ],
-)
-def test_addition(repo, initial_tasks):
-    # Create a repository with some tasks.
-    repo.set_task_list(initial_tasks)
-
-    # Add another
-    task_to_add = Task("Add me!")
-    repo.add_task(task_to_add)
-
-    # Make sure it's there
-    assert any([task == task_to_add for task in repo.get_all_tasks()])
-
-
-@pytest.mark.parametrize('task_to_retrieve', 
-        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))])
-def test_retrieval_when_repository_has_other_tasks(repo, tasks, task_to_retrieve):
-    # load some other tasks in
-    repo.set_task_list(tasks)
-    uuid_to_search = task_to_retrieve.uuid
-    repo.add_task(task_to_retrieve)
-    assert repo.retrieve_task_by_uuid(uuid_to_search) == task_to_retrieve
-
-@pytest.mark.parametrize('task_to_retrieve', 
-        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))])
-def test_retrieval_when_repository_does_not_have_other_tasks(repo, task_to_retrieve):
-    repo.set_task_list([])
-    uuid_to_search = task_to_retrieve.uuid
-    repo.add_task(task_to_retrieve)
-    # TODO(nwm): Fix things here.
-    assert repo.retrieve_task_by_uuid(uuid_to_search) == task_to_retrieve
-
-@pytest.mark.parametrize(
-    "initial_tasks",
-    [
-        [],  # Test empty initial task list
-        [Task("foo")],
-        [Task("foo"), Task("bar"), Task("baz")],
-        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz")],
-        [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))],
-    ],
-)
 def test_attempted_retrieval_returns_none_on_failed_search(repo, initial_tasks):
-    repo.set_task_list(initial_tasks)
+    for task in initial_tasks:
+        repo.add_task(task)
     new_task = Task("foo_description")
     assert repo.retrieve_task_by_uuid(new_task.uuid) is None
 
 @pytest.mark.parametrize("new_status", [CompletionStatus.COMPLETED, CompletionStatus.WONT_DO])
 @pytest.mark.parametrize("new_due", [None, datetime(2022, 1, 2, 4, 5, 6)])
 @pytest.mark.parametrize("new_description", ["foo", "bar", "baz", "Qux!!!!!"])
-def test_update(repo, tasks, new_due, new_description, new_status):
-    repo.set_task_list(tasks)
-    task_to_modify = tasks[0]
+def test_update(repo, tasks, new_due, new_description, new_status, initial_tasks):
+    for task in initial_tasks:
+        repo.add_task(task)
+    task_to_modify = initial_tasks[0]
     task_to_modify.description = new_description
     task_to_modify.due = new_due
     repo.update_task(task_to_modify)
     retrieved = repo.retrieve_task_by_uuid(task_to_modify.uuid)
     assert retrieved.description == new_description
     assert retrieved.due == new_due
+
+@pytest.mark.parametrize('new_task_ix', (0, 1, 2))
+def test_sql_repo_roundtrips(sql_repo, tasks, new_task_ix):
+    for task in tasks:
+        sql_repo.add_task(task)
+    to_retrieve = tasks[new_task_ix]
+    retrieved = sql_repo.retrieve_task_by_uuid(to_retrieve.uuid)
+    assert to_retrieve == retrieved
+
+
+@pytest.mark.parametrize('new_status', (CompletionStatus.WONT_DO, CompletionStatus.COMPLETED))
+def test_sql_repo_updates(sql_repo, tasks, new_status):
+    for task in tasks:
+        sql_repo.add_task(task)
+    to_modify = tasks[1]
+    to_modify.status = new_status
+    sql_repo.update_task(to_modify)
+    retrieved = sql_repo.retrieve_task_by_uuid(to_modify.uuid)
+    assert to_modify == retrieved
+
