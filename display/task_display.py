@@ -2,8 +2,10 @@ from typing import List
 
 from objects.task import Task
 
+
 def completion_button(task):
     return f"<form action='/complete/{task.uuid.hex}' method='post'><input type='submit' value='Mark complete' /></form>"
+
 
 def task_ordered_list(tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
@@ -13,6 +15,7 @@ def task_ordered_list(tasks: List[Task]) -> str:
     result += "</ol>"
     return result
 
+
 def add_task_form() -> str:
     return """<form action="/add" method="post">
         Description: <input type="text" name="description" />
@@ -20,6 +23,7 @@ def add_task_form() -> str:
         Due (leave blank for None): <input type="datetime-local" name="due" />
         <input type='submit' value='Add task' />
     </form>"""
+
 
 def task_display(tasks: List[Task]) -> str:
     """Given a list of tasks, return HTML to display them."""

@@ -7,10 +7,9 @@ from objects.task import CompletionStatus, Task
 from repositories.task_repository import SQLiteTaskRepository
 
 
-
 @pytest.fixture
 def repo():
-    repo = SQLiteTaskRepository(':memory:')
+    repo = SQLiteTaskRepository(":memory:")
     repo.connection.cursor().execute(SQLiteTaskRepository.CREATE_SCHEMA)
     repo.connection.commit()
     return repo
@@ -22,7 +21,12 @@ def test_repo_smoke(repo):
 
 @pytest.fixture
 def initial_tasks():
-    return [Task("foo", datetime(2022, 1, 1)), Task("bar"), Task("baz", datetime(2022, 3, 4, 5, 6, 7))]
+    return [
+        Task("foo", datetime(2022, 1, 1)),
+        Task("bar"),
+        Task("baz", datetime(2022, 3, 4, 5, 6, 7)),
+    ]
+
 
 def test_attempted_retrieval_returns_none_on_failed_search(repo, initial_tasks):
     for task in initial_tasks:
@@ -30,7 +34,10 @@ def test_attempted_retrieval_returns_none_on_failed_search(repo, initial_tasks):
     new_task = Task("foo_description")
     assert repo.retrieve_task_by_uuid(new_task.uuid) is None
 
-@pytest.mark.parametrize("new_status", [CompletionStatus.COMPLETED, CompletionStatus.WONT_DO])
+
+@pytest.mark.parametrize(
+    "new_status", [CompletionStatus.COMPLETED, CompletionStatus.WONT_DO]
+)
 @pytest.mark.parametrize("new_due", [None, datetime(2022, 1, 2, 4, 5, 6)])
 @pytest.mark.parametrize("new_description", ["foo", "bar", "baz", "Qux!!!!!"])
 def test_update(repo, tasks, new_due, new_description, new_status, initial_tasks):
@@ -44,7 +51,8 @@ def test_update(repo, tasks, new_due, new_description, new_status, initial_tasks
     assert retrieved.description == new_description
     assert retrieved.due == new_due
 
-@pytest.mark.parametrize('new_task_ix', (0, 1, 2))
+
+@pytest.mark.parametrize("new_task_ix", (0, 1, 2))
 def test_sql_repo_roundtrips(repo, tasks, new_task_ix):
     for task in tasks:
         repo.add_task(task)
@@ -53,7 +61,9 @@ def test_sql_repo_roundtrips(repo, tasks, new_task_ix):
     assert to_retrieve == retrieved
 
 
-@pytest.mark.parametrize('new_status', (CompletionStatus.WONT_DO, CompletionStatus.COMPLETED))
+@pytest.mark.parametrize(
+    "new_status", (CompletionStatus.WONT_DO, CompletionStatus.COMPLETED)
+)
 def test_sql_repo_updates(repo, tasks, new_status):
     for task in tasks:
         repo.add_task(task)
@@ -62,4 +72,3 @@ def test_sql_repo_updates(repo, tasks, new_status):
     repo.update_task(to_modify)
     retrieved = repo.retrieve_task_by_uuid(to_modify.uuid)
     assert to_modify == retrieved
-
