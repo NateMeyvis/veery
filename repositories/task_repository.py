@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+import sqlite3
 from uuid import UUID
 
 from typing import List, Optional
@@ -105,3 +106,65 @@ class TextFileTaskRepository(TaskRepository):
             raise ValueError(f"Cannot update task {task_to_update}: no task with its UUID exists.")
         self.remove_task(retrieved)
         self.add_task(task_to_update)
+
+class SQLiteTaskRepository(TaskRepository):
+
+    CREATE_SCHEMA = """CREATE TABLE tasks (
+        uuid text NOT NULL PRIMARY KEY,
+        description text,
+        due int,
+        status int)"""
+
+    def __init__(self, db_path):
+        self.connection = sqlite3.connect(db_path)
+
+    @staticmethod
+    def _result_column_to_task(column) -> Task:
+        return Task(
+            uuid=UUID(column[0]),
+            description=column[1],
+            due=datetime.fromtimestamp(column[2]),
+            status=CompletionStatus(column[3])
+        )
+
+    @staticmethod
+    def _task_to_values_string(task):
+        return f"""
+            (
+            '{task.uuid.hex}',
+            '{task.description}',
+            {int(task.due.timestamp())},
+            {task.status.value}
+            )
+        """
+
+    def get_all_tasks(self) -> List[Task]:
+        cursor = self.connection.cursor().execute("SELECT * FROM tasks")
+        results = cursor.fetchall()
+        return [SQLiteTaskRepository._result_column_to_task(result) for result in results]
+
+    def retrieve_task_by_uuid(self, uuid: UUID) -> Optional[Task]:
+        cursor = self.connection.cursor().execute(f"SELECT * FROM tasks WHERE uuid = '{uuid.hex}'")
+        results = cursor.fetchall()
+        if len(results) == 0:
+            return None
+        if len(results) > 1:
+            raise ValueError(f"Found more than 1 task with UUID {uuid}.")
+        return SQLiteTaskRepository._result_column_to_task(results[0])
+
+    def remove_task(self, task_to_remove: Task):
+        self.connection.cursor().execute(f"""DELETE FROM tasks WHERE uuid = '{uuid.hex}'""")
+        self.connection.commit()
+
+    def update_task(self, task_to_update: Task):
+        self.connection.cursor().execute(f"""UPDATE tasks SET 
+        description = '{task_to_update.description}',
+        due = {int(task_to_update.due.timestamp())},
+        status = {task_to_update.status.value}
+        WHERE uuid = '{task_to_update.uuid.hex}'""")
+
+    def add_task(self, task: Task):
+        self.connection.cursor().execute(f"""INSERT INTO tasks VALUES {SQLiteTaskRepository._task_to_values_string(task)}""")
+
+    def set_task_list(self, tasks):
+        raise NotImplementedError
