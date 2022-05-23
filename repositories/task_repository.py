@@ -35,7 +35,7 @@ class SQLiteTaskRepository(TaskRepository):
     CREATE_SCHEMA = """CREATE TABLE tasks (
         uuid text NOT NULL PRIMARY KEY,
         description text,
-        due int,
+        due datetime,
         status int)"""
 
     def __init__(self, db_path):
@@ -46,13 +46,16 @@ class SQLiteTaskRepository(TaskRepository):
         return Task(
             uuid=UUID(column[0]),
             description=column[1],
-            due=datetime.fromtimestamp(column[2]) if column[2] is not None else None,
+            due=datetime.fromisoformat(column[2]) if column[2] else None,
             status=CompletionStatus(column[3])
         )
 
     @staticmethod
-    def _task_to_values_tuple(task):
-        return (task.uuid.hex, task.description, int(task.due.timestamp()) if task.due else None, task.status.value)
+    def _task_to_values_tuple(task, rotated=False): # Rotation for UPDATE order
+        if not rotated:
+            return (task.uuid.hex, task.description, task.due, task.status.value)
+        else:
+            return (task.description, task.due, task.status.value, task.uuid.hex)
 
     def get_all_tasks(self) -> List[Task]:
         cursor = self.connection.cursor().execute("SELECT * FROM tasks")
@@ -69,7 +72,7 @@ class SQLiteTaskRepository(TaskRepository):
         return SQLiteTaskRepository._values_tuple_to_task(results[0])
 
     def remove_task(self, task_to_remove: Task):
-        self.connection.cursor().execute(f"""DELETE FROM tasks WHERE uuid = '{uuid.hex}'""")
+        self.connection.cursor().execute(f"""DELETE FROM tasks WHERE uuid = '{task_to_remove.uuid.hex}'""")
         self.connection.commit()
 
     def update_task(self, task_to_update: Task):
@@ -77,7 +80,7 @@ class SQLiteTaskRepository(TaskRepository):
         description = ?,
         due = ?,
         status = ?
-        WHERE uuid = ?""", (task_to_update.description, task_to_update.due, task_to_update.status.value, task_to_update.uuid.hex))
+        WHERE uuid = ?""", SQLiteTaskRepository._task_to_values_tuple(task_to_update, rotated=True))
 
     def add_task(self, task: Task):
         self.connection.cursor().execute(f"""INSERT INTO tasks VALUES (?, ?, ?, ?)""", SQLiteTaskRepository._task_to_values_tuple(task))

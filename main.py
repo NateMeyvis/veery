@@ -6,9 +6,9 @@ from bottle import redirect, request, route, run
 from display.task_display import task_display
 from objects.task import CompletionStatus, Task
 from repositories.helpers.helpers import mark_complete
-from repositories.task_repository import TaskRepository, TextFileTaskRepository
+from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
-repo = TextFileTaskRepository("task_list.txt")
+repo = SQLiteTaskRepository('tasks.db')
 
 
 @route("/")

@@ -45,21 +45,21 @@ def test_update(repo, tasks, new_due, new_description, new_status, initial_tasks
     assert retrieved.due == new_due
 
 @pytest.mark.parametrize('new_task_ix', (0, 1, 2))
-def test_sql_repo_roundtrips(sql_repo, tasks, new_task_ix):
+def test_sql_repo_roundtrips(repo, tasks, new_task_ix):
     for task in tasks:
-        sql_repo.add_task(task)
+        repo.add_task(task)
     to_retrieve = tasks[new_task_ix]
-    retrieved = sql_repo.retrieve_task_by_uuid(to_retrieve.uuid)
+    retrieved = repo.retrieve_task_by_uuid(to_retrieve.uuid)
     assert to_retrieve == retrieved
 
 
 @pytest.mark.parametrize('new_status', (CompletionStatus.WONT_DO, CompletionStatus.COMPLETED))
-def test_sql_repo_updates(sql_repo, tasks, new_status):
+def test_sql_repo_updates(repo, tasks, new_status):
     for task in tasks:
-        sql_repo.add_task(task)
+        repo.add_task(task)
     to_modify = tasks[1]
     to_modify.status = new_status
-    sql_repo.update_task(to_modify)
-    retrieved = sql_repo.retrieve_task_by_uuid(to_modify.uuid)
+    repo.update_task(to_modify)
+    retrieved = repo.retrieve_task_by_uuid(to_modify.uuid)
     assert to_modify == retrieved
 
