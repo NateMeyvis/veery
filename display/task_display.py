@@ -3,7 +3,9 @@ from typing import List
 from objects.task import Task
 
 def completion_button(task):
-    return f"<form action='/complete/{task.uuid.hex}' method='post'><input type='submit' value='Mark complete' /></form>"
+    return f"""<form action='/complete/{task.uuid.hex}' method='post'>
+            <label for='Mark {task.uuid.hex} complete'>{str(task)}</label>
+            <input type='submit' id='Mark {task.uuid.hex} complete' value='Mark complete' /></form>"""
 
 def task_ordered_list(tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
