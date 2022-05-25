@@ -96,3 +96,4 @@ class SQLiteTaskRepository(TaskRepository):
             f"""INSERT INTO tasks VALUES (?, ?, ?, ?)""",
             SQLiteTaskRepository._task_to_values_tuple(task),
         )
+        self.connection.commit()
