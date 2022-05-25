@@ -21,7 +21,7 @@ class Task:
     uuid: UUID = field(default_factory=uuid4)
 
     def _due_description(self):
-        return 'No due date' if self.due is None else f"Due {self.due.isoformat()}"
+        return "No due date" if self.due is None else f"Due {self.due.isoformat()}"
 
     def _completion_status_description(self):
         return self.status.name
@@ -34,8 +34,10 @@ class Task:
 
     def __eq__(self, other):
         return all(
-            [self.uuid == other.uuid,
-            self.status == other.status,
-            self.due == other.due,
-            self.description == other.description]
+            [
+                self.uuid == other.uuid,
+                self.status == other.status,
+                self.due == other.due,
+                self.description == other.description,
+            ]
         )
