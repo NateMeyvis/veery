@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -40,3 +40,37 @@ def test_tasks_with_identical_fields_get_different_uuids(description, due, statu
     assert t1.uuid != t2.uuid
     assert t2.uuid != t3.uuid
     assert t1.uuid != t3.uuid
+
+def test_kick_default_duration_no_due_date():
+    task = Task("foo")
+    now = datetime.now()
+    task.kick()
+    intended_duration = timedelta(days=1)
+    approximate_actual_duration = task.due - now
+    assert abs(approximate_actual_duration.seconds - intended_duration.seconds) < 1
+
+
+@pytest.mark.parametrize('due_datetime', [
+    datetime.now() + timedelta(seconds=30),
+    datetime.now() + timedelta(days=1, seconds=45),
+    datetime.now() + timedelta(days=1729)
+])
+def test_kick_default_duration_future_due_date(due_datetime):
+    task = Task("foo", due=due_datetime)
+    task.kick()
+    intended_duration = timedelta(days=1)
+    approximate_actual_duration = task.due - due_datetime
+    assert abs(approximate_actual_duration.seconds - intended_duration.seconds) < 1
+
+@pytest.mark.parametrize('due_datetime', [
+    datetime.now() - timedelta(seconds=30),
+    datetime.now() - timedelta(days=1, seconds=45),
+    datetime.now() - timedelta(days=1729)
+])
+def test_kick_default_duration_past_due_date(due_datetime):
+    task = Task("foo", due=due_datetime)
+    now = datetime.now()
+    task.kick()
+    intended_duration = timedelta(days=1)
+    approximate_actual_duration = task.due - now
+    assert abs(approximate_actual_duration.seconds - intended_duration.seconds) < 1

@@ -49,5 +49,12 @@ def proc_complete_task(uuid_str: str, task_repository: TaskRepository = repo):
     mark_complete(task_repository, UUID(uuid_str))
     redirect("/add")
 
+@route("/kick/<uuid_str>", method="POST")
+def proc_kick_task(uuid_str: str, task_repository: TaskRepository = repo):
+    # Supports only the default for now
+    task = task_repository.retrieve_task_by_uuid(UUID(uuid_str))
+    task.kick()
+    task_repository.update_task(task)
+    redirect("/add")
 
 run(host="0.0.0.0", port=8000)

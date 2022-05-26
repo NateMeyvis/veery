@@ -8,12 +8,17 @@ def completion_button(task):
             <label for='Mark {task.uuid.hex} complete'>{str(task)}</label>
             <input type='submit' id='Mark {task.uuid.hex} complete' value='Mark complete' /></form>"""
 
+def kick_button(task):
+    return f"""<form action='/kick/{task.uuid.hex}' method='post'>
+            <label for='Kick {task.uuid.hex}'>Kick</label>
+            <input type='submit' id='Kick {task.uuid.hex}' value='Kick' /></form>"""
+
 
 def task_ordered_list(tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
     result = "<ol>"
     for task in tasks:
-        result += f"<li>{completion_button(task)}</li>"
+        result += f"<li>{completion_button(task)} {kick_button(task)}</li>"
     result += "</ol>"
     return result
 

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
 
@@ -31,6 +31,15 @@ class Task:
 
     def __str__(self):
         return f"{self.description}: {self._due_description()}"
+
+    def kick(self, duration = timedelta(days=1)):
+        """Add <duration> to the time to complete the task;
+        if the task currently has no due date, or if the due date
+        is in the past, make it <duration> from now."""
+        if not self.due or self.due < datetime.now():
+            self.due = datetime.now() + duration
+        else:
+            self.due += duration
 
     def __eq__(self, other):
         return all(
