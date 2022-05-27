@@ -2,23 +2,51 @@ from typing import List
 
 from objects.task import Task
 
+FONT_CSS = "<link href='http://fonts.googleapis.com/css?family=Work+Sans' rel='stylesheet' type='text/css'>"
+
+BASE_CSS = f"""<style>
+            body {{
+                font-family: 'Work Sans';
+                background-color: lightgrey;
+            }}
+            input {{
+                display: inline-block;
+                color: blue;
+            }}
+            .button {{
+                display: inline-block;
+            }}
+            .task {{
+                display: inline-block;
+            }}
+            .main-task {{
+                max-width: 825px;
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: 100px;
+            }}
+            </style>
+        """
 
 def completion_button(task):
-    return f"""<form action='/complete/{task.uuid.hex}' method='post'>
+    return f"""<form class='completion button' action='/complete/{task.uuid.hex}' method='post'>
             <label for='Mark {task.uuid.hex} complete'>{str(task)}</label>
             <input type='submit' id='Mark {task.uuid.hex} complete' value='Mark complete' /></form>"""
 
 def kick_button(task):
-    return f"""<form action='/kick/{task.uuid.hex}' method='post'>
-            <label for='Kick {task.uuid.hex}'>Kick</label>
+    return f"""<form class='kick button' action='/kick/{task.uuid.hex}' method='post'>
             <input type='submit' id='Kick {task.uuid.hex}' value='Kick' /></form>"""
 
 
+def li_for_task(task):
+    return f"""
+        <li><div class='task' id='task-{task.uuid.hex}>{completion_button(task)}{kick_button(task)}</div></li>
+    """
+
 def task_ordered_list(tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
-    result = "<ol>"
-    for task in tasks:
-        result += f"<li>{completion_button(task)} {kick_button(task)}</li>"
+    result = "<ol class='task-list'>"
+    result += ''.join([li_for_task(task) for task in tasks])
     result += "</ol>"
     return result
 
@@ -38,11 +66,15 @@ def task_display(tasks: List[Task]) -> str:
         <html>
         <head>
             <title>Veery</title>
-        <head>
+            {FONT_CSS}
+            {BASE_CSS}
+        </head>
         <body>
-            {task_ordered_list(tasks)}
-            <br>
-            {add_task_form()}
+            <div class='main-task'>
+                {task_ordered_list(tasks)}
+                <br>
+                {add_task_form()}
+            </div>
         </body>
         </html>
     """
