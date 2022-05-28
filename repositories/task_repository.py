@@ -36,7 +36,8 @@ class SQLiteTaskRepository(TaskRepository):
         uuid text NOT NULL PRIMARY KEY,
         description text,
         due datetime,
-        status int)"""
+        status int,
+        created datetime)"""
 
     def __init__(self, db_path):
         self.connection = sqlite3.connect(db_path)
@@ -48,14 +49,15 @@ class SQLiteTaskRepository(TaskRepository):
             description=column[1],
             due=datetime.fromisoformat(column[2]) if column[2] else None,
             status=CompletionStatus(column[3]),
+            created=datetime.fromisoformat(column[4])
         )
 
     @staticmethod
     def _task_to_values_tuple(task, rotated=False):  # Rotation for UPDATE order
         if not rotated:
-            return (task.uuid.hex, task.description, task.due, task.status.value)
+            return (task.uuid.hex, task.description, task.due, task.status.value, task.created)
         else:
-            return (task.description, task.due, task.status.value, task.uuid.hex)
+            return (task.description, task.due, task.status.value, task.created, task.uuid.hex)
 
     def get_all_tasks(self) -> List[Task]:
         cursor = self.connection.cursor().execute("SELECT * FROM tasks")
@@ -86,14 +88,15 @@ class SQLiteTaskRepository(TaskRepository):
             f"""UPDATE tasks SET 
         description = ?,
         due = ?,
-        status = ?
+        status = ?,
+        created = ?
         WHERE uuid = ?""",
             SQLiteTaskRepository._task_to_values_tuple(task_to_update, rotated=True),
         )
 
     def add_task(self, task: Task):
         self.connection.cursor().execute(
-            f"""INSERT INTO tasks VALUES (?, ?, ?, ?)""",
+            f"""INSERT INTO tasks VALUES (?, ?, ?, ?, ?)""",
             SQLiteTaskRepository._task_to_values_tuple(task),
         )
         self.connection.commit()

@@ -40,7 +40,7 @@ def test_attempted_retrieval_returns_none_on_failed_search(repo, initial_tasks):
 )
 @pytest.mark.parametrize("new_due", [None, datetime(2022, 1, 2, 4, 5, 6)])
 @pytest.mark.parametrize("new_description", ["foo", "bar", "baz", "Qux!!!!!"])
-def test_update(repo, tasks, new_due, new_description, new_status, initial_tasks):
+def test_update_basic(repo, tasks, new_due, new_description, new_status, initial_tasks):
     for task in initial_tasks:
         repo.add_task(task)
     task_to_modify = initial_tasks[0]
@@ -50,6 +50,21 @@ def test_update(repo, tasks, new_due, new_description, new_status, initial_tasks
     retrieved = repo.retrieve_task_by_uuid(task_to_modify.uuid)
     assert retrieved.description == new_description
     assert retrieved.due == new_due
+
+@pytest.mark.parametrize(
+    "new_status", [CompletionStatus.COMPLETED, CompletionStatus.WONT_DO]
+)
+@pytest.mark.parametrize("new_due", [None, datetime(2022, 1, 2, 4, 5, 6)])
+@pytest.mark.parametrize("new_description", ["foo", "bar", "baz", "Qux!!!!!"])
+def test_update_preserves_create_datetime(repo, tasks, new_due, new_description, new_status, initial_tasks):
+    for task in initial_tasks:
+        repo.add_task(task)
+    task_to_modify = initial_tasks[0]
+    task_to_modify.description = new_description
+    task_to_modify.due = new_due
+    repo.update_task(task_to_modify)
+    retrieved = repo.retrieve_task_by_uuid(task_to_modify.uuid)
+    assert retrieved.created == task_to_modify.created
 
 
 @pytest.mark.parametrize("new_task_ix", (0, 1, 2))
