@@ -28,10 +28,12 @@ BASE_CSS = f"""<style>
             </style>
         """
 
+
 def completion_button(task):
     return f"""<form class='completion button' action='/complete/{task.uuid.hex}' method='post'>
             <label for='Mark {task.uuid.hex} complete'>{str(task)}</label>
             <input type='submit' id='Mark {task.uuid.hex} complete' value='Mark complete' /></form>"""
+
 
 def kick_button(task):
     return f"""<form class='kick button' action='/kick/{task.uuid.hex}' method='post'>
@@ -43,10 +45,11 @@ def li_for_task(task):
         <li><div class='task' id='task-{task.uuid.hex}>{completion_button(task)}{kick_button(task)}</div></li>
     """
 
+
 def task_ordered_list(tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
     result = "<ol class='task-list'>"
-    result += ''.join([li_for_task(task) for task in tasks])
+    result += "".join([li_for_task(task) for task in tasks])
     result += "</ol>"
     return result
 
