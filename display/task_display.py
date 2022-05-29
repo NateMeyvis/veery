@@ -25,11 +25,24 @@ BASE_CSS = f"""<style>
                 margin-right: auto;
                 margin-top: 100px;
             }}
+            .overdue {{
+                background-color: pink;
+            }}
+            .stale {{
+                background-color: lightbrown;
+            }}
             </style>
         """
 
+def class_list_for_task(task: Task) -> str:
+    class_names = ['task']
+    if task.overdue:
+        class_names.append('overdue')
+    if task.stale:
+        class_names.append('stale')
+    return ' '.join(class_names)
 
-def completion_button(task):
+def completion_button(task: Task) -> str:
     return f"""<form class='completion button' action='/complete/{task.uuid.hex}' method='post'>
             <label for='Mark {task.uuid.hex} complete'>{str(task)}</label>
             <input type='submit' id='Mark {task.uuid.hex} complete' value='Mark complete' /></form>"""
@@ -42,7 +55,7 @@ def kick_button(task):
 
 def li_for_task(task):
     return f"""
-        <li><div class='task' id='task-{task.uuid.hex}>{completion_button(task)}{kick_button(task)}</div></li>
+        <li><div class='{class_list_for_task(task)}' id='task-{task.uuid.hex}'>{completion_button(task)}{kick_button(task)}</div></li>
     """
 
 
