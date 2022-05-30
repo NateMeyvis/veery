@@ -34,13 +34,15 @@ BASE_CSS = f"""<style>
             </style>
         """
 
+
 def class_list_for_task(task: Task) -> str:
-    class_names = ['task']
+    class_names = ["task"]
     if task.overdue:
-        class_names.append('overdue')
+        class_names.append("overdue")
     if task.stale:
-        class_names.append('stale')
-    return ' '.join(class_names)
+        class_names.append("stale")
+    return " ".join(class_names)
+
 
 def completion_button(task: Task) -> str:
     return f"""<form class='completion button' action='/complete/{task.uuid.hex}' method='post'>

@@ -3,7 +3,7 @@ from objects.task import CompletionStatus
 
 repo = SQLiteTaskRepository("tasks.db")
 
-if __name__=="__main__":
+if __name__ == "__main__":
     active = [
         task
         for task in repo.get_all_tasks()

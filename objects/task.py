@@ -61,6 +61,6 @@ class Task:
                 self.status == other.status,
                 self.due == other.due,
                 self.description == other.description,
-                self.created == other.created
+                self.created == other.created,
             ]
         )

@@ -49,15 +49,27 @@ class SQLiteTaskRepository(TaskRepository):
             description=column[1],
             due=datetime.fromisoformat(column[2]) if column[2] else None,
             status=CompletionStatus(column[3]),
-            created=datetime.fromisoformat(column[4])
+            created=datetime.fromisoformat(column[4]),
         )
 
     @staticmethod
     def _task_to_values_tuple(task, rotated=False):  # Rotation for UPDATE order
         if not rotated:
-            return (task.uuid.hex, task.description, task.due, task.status.value, task.created)
+            return (
+                task.uuid.hex,
+                task.description,
+                task.due,
+                task.status.value,
+                task.created,
+            )
         else:
-            return (task.description, task.due, task.status.value, task.created, task.uuid.hex)
+            return (
+                task.description,
+                task.due,
+                task.status.value,
+                task.created,
+                task.uuid.hex,
+            )
 
     def get_all_tasks(self) -> List[Task]:
         cursor = self.connection.cursor().execute("SELECT * FROM tasks")
