@@ -27,7 +27,7 @@ def completion(completed_task):
 @pytest.fixture
 def repo_after_kickoff(in_memory_repo, completed_task, completion):
     in_memory_repo.add_task(completed_task)
-    coordinator = KickoffCoordinator(repo=in_memory_repo, interval=timedelta(days=7))
+    coordinator = KickoffCoordinator(task_repo=in_memory_repo, tasks_to_track=[completed_task], interval=timedelta(days=7))
     coordinator.proc_event(completion)
     yield in_memory_repo
 
