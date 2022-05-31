@@ -2,7 +2,7 @@
 
 #### Where to read about Veery
 
-https://www.natemeyvis.com/python-project-from-scratch/
+https://www.natemeyvis.com/python-task-manager-from-scratch-part-0-introduction.html
 
 #### Things in version control
 
