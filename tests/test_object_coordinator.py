@@ -27,7 +27,9 @@ def completion(completed_task):
 @pytest.fixture
 def repo_after_kickoff(in_memory_repo, completed_task, completion):
     in_memory_repo.add_task(completed_task)
-    coordinator = KickoffCoordinator(task_repo=in_memory_repo, tasks_to_track=[completed_task], interval=timedelta(days=7))
+    coordinator = KickoffCoordinator(
+        tasks_to_track=[completed_task], interval=timedelta(days=7)
+    )
     coordinator.proc_event(completion)
     yield in_memory_repo
 
@@ -37,23 +39,21 @@ def test_coordinator_does_not_alter_completed_task(repo_after_kickoff, completed
     assert retrieved and retrieved == completed_task
 
 
-def test_coordinator_adds_appropriate_task(
-    repo_after_kickoff, completed_task, completion
-):
-    cursor = repo_after_kickoff.connection.cursor().execute("SELECT * FROM tasks")
-    results = cursor.fetchall()
-    assert len(results) == 2
-    tasks = [SQLiteTaskRepository._values_tuple_to_task(result) for result in results]
+def test_coordinator_emits_appropriate_event(completion, completed_task):
+    coordinator = KickoffCoordinator(
+        tasks_to_track=[completed_task], interval=timedelta(days=7)
+    )
+    result = coordinator.proc_event(completion)
     expected = Task(
         completed_task.description,
         completion.completed_at + timedelta(days=7),
         status=CompletionStatus.OUTSTANDING,
     )
-    assert any(
-        [
-            task.description == expected.description
-            and task.status == expected.status
-            and task.due == expected.due
-            for task in tasks
-        ]
+    assert len(result) == 1
+    emitted_event = result[0]
+    emitted_event_task = emitted_event.task
+    assert (
+        expected.description == emitted_event_task.description
+        and expected.status == emitted_event_task.status
+        and expected.due == emitted_event_task.due
     )
