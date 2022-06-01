@@ -3,26 +3,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List
 
+from objects.commands import Command, AddTask
+from objects.events import Event, TaskCompletion
 from objects.task import Task
-
-
-class Event:
-    pass
-
-
-class Command:
-    pass
-
-
-@dataclass
-class AddTask(Command):
-    task: Task
-
-
-@dataclass
-class TaskCompletion(Event):
-    task: Task
-    completed_at: datetime
 
 
 class TaskCoordinator(ABC):
