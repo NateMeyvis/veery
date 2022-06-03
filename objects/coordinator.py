@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
+from uuid import uuid4, UUID
 
 from objects.commands import Command, AddTask
 from objects.events import Event, TaskCompletion
@@ -16,19 +17,21 @@ class TaskCoordinator(ABC):
 
 class KickoffCoordinator(TaskCoordinator):
     def __init__(
-        self, tasks_to_track: List[Task], interval: timedelta = timedelta(days=1)
+        self, task_to_track: Task, interval: timedelta = timedelta(days=1), uuid_: Optional[UUID] = None
     ):
-        self.task_uuids_to_track = set([t.uuid for t in tasks_to_track])
+        self.current_task_uuid = task_to_track.uuid
         self.interval = interval  # After a task is completed, schedule the next one <interval> from its completion
+        self.uuid = uuid_ or uuid4()
 
     def proc_event(self, event: Event) -> List[Command]:
         if (
             isinstance(event, TaskCompletion)
-            and event.task.uuid in self.task_uuids_to_track
+            and event.task.uuid == self.current_task_uuid
         ):
             next_task = Task(
                 description=event.task.description,
                 due=event.completed_at + self.interval,
             )
+            self.current_task_uuid = next_task.uuid
             return [AddTask(next_task)]
         return []
