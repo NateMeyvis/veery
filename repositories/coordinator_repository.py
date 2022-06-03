@@ -11,6 +11,7 @@ class CoordinatorRepository:
         raise NotImplementedError
 
     def check_task_by_uuid(self, task_uuid: UUID) -> List[TaskCoordinator]:
+        """Given a task UUID, gives a list of coordinators coordinating it."""
         raise NotImplementedError
 
 class SQLiteCoordinatorRepository(CoordinatorRepository):
@@ -33,3 +34,12 @@ class SQLiteCoordinatorRepository(CoordinatorRepository):
             kickoff_coordinator.current_task_uuid.hex,
             (kickoff_coordinator.interval.seconds / 60)
         )
+
+    def add(self, task_coordinator: TaskCoordinator):
+        if not isinstance(task_coordinator, KickoffCoordinator):
+            raise NotImplementedError
+
+    def check_task_by_uuid(self, task_uuid: UUID) -> List[TaskCoordinator]:
+        # Currently only KickoffCoordinators are implemented
+        results = self.connection.cursor().execute(f"SELECT * FROM kickoff_coordinators WHERE current_task_uuid = '{task_uuid.hex}'")
+        return [SQLiteCoordinatorRepository._values_tuple_to_kickoff_coordinator(result) for result in results]
