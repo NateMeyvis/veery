@@ -28,7 +28,7 @@ def completion(completed_task):
 def repo_after_kickoff(in_memory_repo, completed_task, completion):
     in_memory_repo.add_task(completed_task)
     coordinator = KickoffCoordinator(
-        task_to_track=completed_task, interval=timedelta(days=7)
+        task_uuid_to_track=completed_task.uuid, interval=timedelta(days=7)
     )
     coordinator.proc_event(completion)
     yield in_memory_repo
@@ -41,7 +41,7 @@ def test_coordinator_does_not_alter_completed_task(repo_after_kickoff, completed
 
 def test_coordinator_emits_appropriate_event(completion, completed_task):
     coordinator = KickoffCoordinator(
-        task_to_track=completed_task, interval=timedelta(days=7)
+        task_uuid_to_track=completed_task.uuid, interval=timedelta(days=7)
     )
     result = coordinator.proc_event(completion)
     expected = Task(

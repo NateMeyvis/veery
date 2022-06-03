@@ -17,9 +17,9 @@ class TaskCoordinator(ABC):
 
 class KickoffCoordinator(TaskCoordinator):
     def __init__(
-        self, task_to_track: Task, interval: timedelta = timedelta(days=1), uuid_: Optional[UUID] = None
+        self, task_uuid_to_track: UUID, interval: timedelta = timedelta(days=1), uuid_: Optional[UUID] = None
     ):
-        self.current_task_uuid = task_to_track.uuid
+        self.current_task_uuid = task_uuid_to_track
         self.interval = interval  # After a task is completed, schedule the next one <interval> from its completion
         self.uuid = uuid_ or uuid4()
 

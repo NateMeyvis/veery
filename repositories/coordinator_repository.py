@@ -1,3 +1,4 @@
+from datetime import timedelta
 import sqlite3
 
 from typing import List
@@ -23,7 +24,7 @@ class SQLiteCoordinatorRepository(CoordinatorRepository):
     def _values_tuple_to_kickoff_coordinator(column) -> KickoffCoordinator:
         return KickoffCoordinator(
             uuid_ = UUID(column[0]),
-            current_task_uuid = UUID(column[1]),
+            task_uuid_to_track = UUID(column[1]),
             interval = timedelta(seconds = column[2] * 60)
         )
 
@@ -38,6 +39,8 @@ class SQLiteCoordinatorRepository(CoordinatorRepository):
     def add(self, task_coordinator: TaskCoordinator):
         if not isinstance(task_coordinator, KickoffCoordinator):
             raise NotImplementedError
+        self.connection.cursor().execute(f"INSERT INTO kickoff_coordinators VALUES (?, ?, ?)", SQLiteCoordinatorRepository._kickoff_coordinator_to_values_tuple(task_coordinator))
+        self.connection.commit()
 
     def check_task_by_uuid(self, task_uuid: UUID) -> List[TaskCoordinator]:
         # Currently only KickoffCoordinators are implemented
