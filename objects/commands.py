@@ -1,6 +1,6 @@
 from dataclasses import dataclass
+from typing import Optional
 
-from objects.coordinator import TaskCoordinator
 from objects.task import Task
 
 
@@ -11,4 +11,4 @@ class Command:
 @dataclass
 class AddTask(Command):
     task: Task
-    coordinator: Optional[TaskCoordinator]
+    coordinator: Optional = None
