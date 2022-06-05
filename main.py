@@ -14,10 +14,12 @@ from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 task_repo = SQLiteTaskRepository("tasks.db")
 coordinator_repo = SQLiteCoordinatorRepository("tasks.db")
 
+
 def task_adder(add_task_event: AddTask):
-        task_repo.add_task(event.task)
-        if event.coordinator is not None:
-            raise NotImplementedError
+    task_repo.add_task(event.task)
+    if event.coordinator is not None:
+        raise NotImplementedError
+
 
 def event_handler(event: Event):
     if isinstance(event, AddTask):
