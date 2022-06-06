@@ -73,7 +73,9 @@ def add_task_form() -> str:
     return """<form action="/add" method="post">
         Description: <input type="text" name="description" />
         <br>
-        Due (leave blank for None): <input type="datetime-local" name="due" />
+        Due date (leave blank for None): <input type="datetime-local" name="due" />
+        <br>
+        Repeat how many days after completion? (Leave blank for None.) <input type="number" name="reschedule_interval" />
         <input type='submit' value='Add task' />
     </form>"""
 

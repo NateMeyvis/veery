@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from bottle import redirect, request, route, run
@@ -57,7 +57,17 @@ def proc_add_task():
         if request.forms.get("due")
         else None
     )
-    task_repo.add_task(Task(description=description, due=due))
+    raw_reschedule_interval = request.forms.get("reschedule_interval")
+    reschedule_interval = (
+        timedelta(days=int(raw_reschedule_interval))
+        if raw_reschedule_interval
+        else None
+    )
+    command = AddTask(
+        task=Task(description=description, due=due),
+        reschedule_interval=reschedule_interval,
+    )
+    command_handler(command)
     redirect("/add")
 
 
