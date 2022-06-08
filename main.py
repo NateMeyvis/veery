@@ -6,8 +6,9 @@ from bottle import redirect, request, route, run
 from display.task_display import task_display
 from objects.task import CompletionStatus, Task
 from repositories.helpers.helpers import mark_complete
+from objects.coordinator import KickoffCoordinator
 from objects.commands import AddTask, Command
-from objects.events import Event
+from objects.events import Event, TaskCompletion
 from repositories.coordinator_repository import SQLiteCoordinatorRepository
 from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
@@ -15,16 +16,30 @@ task_repo = SQLiteTaskRepository("tasks.db")
 coordinator_repo = SQLiteCoordinatorRepository("tasks.db")
 
 
+def task_completer(task_completion: TaskCompletion):
+    coordinators = coordinator_repo.check_task_by_uuid(task_completion.task.uuid)
+    results = []
+    for coordinator in coordinators:
+        results.extend(coordinator.proc_event(task_completion))
+    for result in results:
+        handler(result)
+
+
 def task_adder(add_task_command: AddTask):
     task_repo.add_task(add_task_command.task)
     if add_task_command.reschedule_interval is not None:
-        raise NotImplementedError
+        coordinator = KickoffCoordinator(
+            task_uuid_to_track = add_task_command.task.uuid,
+            interval = add_task_command.reschedule_interval,
+        )
+        coordinator_repo.add(coordinator)
 
 
-def command_handler(command: Command):
-    if isinstance(command, AddTask):
-        task_adder(command)
-    else:
+def handler(command_or_event: Command|Event):
+    if isinstance(command_or_event, AddTask):
+        task_adder(command_or_event)
+    elif isinstance(command_or_event, TaskCompletion):
+        task_completer(command_or_event)
         raise NotImplementedError
 
 
@@ -67,13 +82,15 @@ def proc_add_task():
         task=Task(description=description, due=due),
         reschedule_interval=reschedule_interval,
     )
-    command_handler(command)
+    handler(command)
     redirect("/add")
 
 
 @route("/complete/<uuid_str>", method="POST")
 def proc_complete_task(uuid_str: str):
     mark_complete(task_repo, UUID(uuid_str))
+    event = TaskCompletion(UUID(uuid_str), datetime.now())
+    handler(event)
     redirect("/add")
 
 

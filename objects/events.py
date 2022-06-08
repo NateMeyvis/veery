@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from uuid import UUID
 
 from objects.task import Task
 
@@ -10,5 +11,5 @@ class Event:
 
 @dataclass
 class TaskCompletion(Event):
-    task: Task
+    task: Task|UUID
     completed_at: datetime
