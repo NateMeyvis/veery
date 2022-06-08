@@ -17,6 +17,7 @@ coordinator_repo = SQLiteCoordinatorRepository("tasks.db")
 
 
 def task_completer(task_completion: TaskCompletion):
+    # TODO(nwm): Rename to reflect the fact that it doesn't complete the task
     coordinators = coordinator_repo.check_task_by_uuid(task_completion.task.uuid)
     results = []
     for coordinator in coordinators:
@@ -40,6 +41,7 @@ def handler(command_or_event: Command|Event):
         task_adder(command_or_event)
     elif isinstance(command_or_event, TaskCompletion):
         task_completer(command_or_event)
+    else:
         raise NotImplementedError
 
 
@@ -89,7 +91,8 @@ def proc_add_task():
 @route("/complete/<uuid_str>", method="POST")
 def proc_complete_task(uuid_str: str):
     mark_complete(task_repo, UUID(uuid_str))
-    event = TaskCompletion(UUID(uuid_str), datetime.now())
+    task = task_repo.retrieve_task_by_uuid(UUID(uuid_str))
+    event = TaskCompletion(task, datetime.now())
     handler(event)
     redirect("/add")
 

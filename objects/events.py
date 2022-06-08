@@ -11,5 +11,5 @@ class Event:
 
 @dataclass
 class TaskCompletion(Event):
-    task: Task|UUID
+    task: Task
     completed_at: datetime
