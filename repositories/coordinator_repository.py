@@ -15,6 +15,9 @@ class CoordinatorRepository:
         """Given a task UUID, gives a list of coordinators coordinating it."""
         raise NotImplementedError
 
+    def update(self, task_coordinator: TaskCoordinator):
+        raise NotImplementedError
+
 
 class SQLiteCoordinatorRepository(CoordinatorRepository):
     CREATE_SCHEMA = f"""CREATE TABLE kickoff_coordinators (uuid text NOT NULL PRIMARY KEY, current_task_uuid text, interval_minutes int)"""
@@ -58,3 +61,12 @@ class SQLiteCoordinatorRepository(CoordinatorRepository):
             SQLiteCoordinatorRepository._values_tuple_to_kickoff_coordinator(result)
             for result in results
         ]
+
+    def update(self, task_coordinator: TaskCoordinator):
+        if not isinstance(task_coordinator, KickoffCoordinator):
+            raise NotImplementedError
+        #TODO(nwm) Support updating other fields if necessary
+        self.connection.cursor().execute(
+            f"UPDATE kickoff_coordinators SET current_task_uuid = '{task_coordinator.current_task_uuid.hex}' WHERE uuid = '{task_coordinator.uuid.hex}'")
+        self.connection.commit()
+

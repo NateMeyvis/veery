@@ -16,12 +16,12 @@ task_repo = SQLiteTaskRepository("tasks.db")
 coordinator_repo = SQLiteCoordinatorRepository("tasks.db")
 
 
-def task_completer(task_completion: TaskCompletion):
-    # TODO(nwm): Rename to reflect the fact that it doesn't complete the task
+def task_completion_handler(task_completion: TaskCompletion):
     coordinators = coordinator_repo.check_task_by_uuid(task_completion.task.uuid)
     results = []
     for coordinator in coordinators:
         results.extend(coordinator.proc_event(task_completion))
+        coordinator_repo.update(coordinator) # Persist updated task to track
     for result in results:
         handler(result)
 
@@ -40,7 +40,7 @@ def handler(command_or_event: Command|Event):
     if isinstance(command_or_event, AddTask):
         task_adder(command_or_event)
     elif isinstance(command_or_event, TaskCompletion):
-        task_completer(command_or_event)
+        task_completion_handler(command_or_event)
     else:
         raise NotImplementedError
 
