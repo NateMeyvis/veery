@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Union
 from uuid import UUID
 
 from bottle import redirect, request, route, run
@@ -36,7 +37,7 @@ def task_adder(add_task_command: AddTask):
         coordinator_repo.add(coordinator)
 
 
-def handler(command_or_event: Command|Event):
+def handler(command_or_event: Union[Command,Event]):
     if isinstance(command_or_event, AddTask):
         task_adder(command_or_event)
     elif isinstance(command_or_event, TaskCompletion):

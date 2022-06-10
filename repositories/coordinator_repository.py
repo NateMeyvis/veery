@@ -38,7 +38,7 @@ class SQLiteCoordinatorRepository(CoordinatorRepository):
         return (
             kickoff_coordinator.uuid.hex,
             kickoff_coordinator.current_task_uuid.hex,
-            (kickoff_coordinator.interval.seconds / 60),
+            (kickoff_coordinator.interval.total_seconds() / 60),
         )
 
     def add(self, task_coordinator: TaskCoordinator):
