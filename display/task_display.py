@@ -44,33 +44,33 @@ def class_list_for_task(task: Task) -> str:
     return " ".join(class_names)
 
 
-def completion_button(task: Task) -> str:
-    return f"""<form class='completion button' action='/complete/{task.uuid.hex}' method='post'>
+def completion_button(env, task: Task) -> str:
+    return f"""<form class='completion button' action='/{env}/complete/{task.uuid.hex}' method='post'>
             <label for='Mark {task.uuid.hex} complete'>{str(task)}</label>
             <input type='submit' id='Mark {task.uuid.hex} complete' value='Mark complete' /></form>"""
 
 
-def kick_button(task):
-    return f"""<form class='kick button' action='/kick/{task.uuid.hex}' method='post'>
+def kick_button(env, task):
+    return f"""<form class='kick button' action='/{env}/kick/{task.uuid.hex}' method='post'>
             <input type='submit' id='Kick {task.uuid.hex}' value='Kick' /></form>"""
 
 
-def li_for_task(task):
+def li_for_task(env, task):
     return f"""
-        <li><div class='{class_list_for_task(task)}' id='task-{task.uuid.hex}'>{completion_button(task)}{kick_button(task)}</div></li>
+        <li><div class='{class_list_for_task(task)}' id='task-{task.uuid.hex}'>{completion_button(env, task)}{kick_button(env, task)}</div></li>
     """
 
 
-def task_ordered_list(tasks: List[Task]) -> str:
+def task_ordered_list(env: str, tasks: List[Task]) -> str:
     """Given a list of tasks, return an HTML ordered list of them."""
     result = "<ol class='task-list'>"
-    result += "".join([li_for_task(task) for task in tasks])
+    result += "".join([li_for_task(env, task) for task in tasks])
     result += "</ol>"
     return result
 
 
-def add_task_form() -> str:
-    return """<form action="/add" method="post">
+def add_task_form(env) -> str:
+    return f"""<form action="/{env}/add" method="post">
         Description: <input type="text" name="description" />
         <br>
         Due date (leave blank for None): <input type="datetime-local" name="due" />
@@ -80,7 +80,7 @@ def add_task_form() -> str:
     </form>"""
 
 
-def task_display(tasks: List[Task]) -> str:
+def task_display(env: str, tasks: List[Task]) -> str:
     """Given a list of tasks, return HTML to display them."""
     return f"""
         <html>
@@ -91,9 +91,9 @@ def task_display(tasks: List[Task]) -> str:
         </head>
         <body>
             <div class='main-task'>
-                {task_ordered_list(tasks)}
+                {task_ordered_list(env, tasks)}
                 <br>
-                {add_task_form()}
+                {add_task_form({env})}
             </div>
         </body>
         </html>

@@ -33,8 +33,7 @@ class KickoffCoordinator(TaskCoordinator):
         ):
             next_task = Task(
                 description=event.task.description,
-                due=event.completed_at + self.interval
-
+                due=event.completed_at + self.interval,
             )
             self.current_task_uuid = next_task.uuid
             return [AddTask(next_task)]
