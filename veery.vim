@@ -40,11 +40,11 @@ set shortmess=aoO
 argglobal
 %argdel
 $argadd main.py
-edit repositories/coordinator_repository.py
+edit main.py
 set splitbelow splitright
 wincmd _ | wincmd |
-split
-1wincmd k
+vsplit
+1wincmd h
 wincmd w
 set nosplitbelow
 set nosplitright
@@ -55,7 +55,7 @@ set winminwidth=0
 set winwidth=1
 wincmd =
 argglobal
-balt objects/coordinator.py
+balt objects/environment.py
 setlocal noautoindent
 setlocal backupcopy=
 setlocal nobinary
@@ -175,16 +175,15 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 68 - ((9 * winheight(0) + 10) / 20)
+let s:l = 18 - ((8 * winheight(0) + 9) / 19)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 68
-normal! 061|
+keepjumps 18
+normal! 024|
 wincmd w
 argglobal
-if bufexists("main.py") | buffer main.py | else | edit main.py | endif
-balt objects/coordinator.py
+if bufexists("display/task_display.py") | buffer display/task_display.py | else | edit display/task_display.py | endif
 setlocal noautoindent
 setlocal backupcopy=
 setlocal nobinary
@@ -304,18 +303,19 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 19 - ((0 * winheight(0) + 9) / 19)
+let s:l = 71 - ((22 * winheight(0) + 20) / 40)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 19
-normal! 060|
+keepjumps 71
+normal! 0
+lcd ~/Documents/veery
 wincmd w
 wincmd =
 tabnext 1
-badd +0 main.py
-badd +39 objects/coordinator.py
-badd +0 repositories/coordinator_repository.py
+badd +119 ~/Documents/veery/main.py
+badd +7 ~/Documents/veery/objects/environment.py
+badd +0 ~/Documents/veery/display/task_display.py
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

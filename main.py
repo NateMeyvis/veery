@@ -9,8 +9,9 @@ from objects.task import CompletionStatus, Task
 from repositories.helpers.helpers import mark_complete
 from objects.coordinator import KickoffCoordinator
 from objects.commands import AddTask, Command
-from objects.environment import Environment
+from objects.environment import environment_for, Environment
 from objects.events import Event, TaskCompletion
+from objects.handlers import handler, task_completion_handler, task_adder
 from repositories.coordinator_repository import SQLiteCoordinatorRepository
 from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
@@ -22,37 +23,6 @@ def environment_for(env) -> Environment:
             coordinator_repository=SQLiteCoordinatorRepository("tasks.db"),
         )
     raise ValueError(f"{env} is not an environment")
-
-
-def task_completion_handler(env, task_completion: TaskCompletion):
-    coordinator_repo = environment_for(env).coordinator_repository
-    coordinators = coordinator_repo.check_task_by_uuid(task_completion.task.uuid)
-    results = []
-    for coordinator in coordinators:
-        results.extend(coordinator.proc_event(task_completion))
-        coordinator_repo.update(coordinator)  # Persist updated task to track
-    for result in results:
-        handler(env, result)
-
-
-def task_adder(env, add_task_command: AddTask):
-    task_repo = environment_for(env).task_repository
-    task_repo.add_task(add_task_command.task)
-    if add_task_command.reschedule_interval is not None:
-        coordinator = KickoffCoordinator(
-            task_uuid_to_track=add_task_command.task.uuid,
-            interval=add_task_command.reschedule_interval,
-        )
-        coordinator_repo.add(env, coordinator)
-
-
-def handler(env, command_or_event: Union[Command, Event]):
-    if isinstance(command_or_event, AddTask):
-        task_adder(env, command_or_event)
-    elif isinstance(command_or_event, TaskCompletion):
-        task_completion_handler(env, command_or_event)
-    else:
-        raise NotImplementedError
 
 
 @route("/<env>/")
