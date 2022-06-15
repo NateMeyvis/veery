@@ -66,7 +66,6 @@ def proc_add_task(env: str):
 @route("/<env>/complete/<uuid_str>", method="POST")
 def proc_complete_task(env: str, uuid_str: str):
     task_repo = environment_for(env).task_repository
-    mark_complete(task_repo, UUID(uuid_str))
     task = task_repo.retrieve_task_by_uuid(UUID(uuid_str))
     event = TaskCompletion(task, datetime.now())
     handler(environment_for(env), event)

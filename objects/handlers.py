@@ -4,11 +4,13 @@ from objects.coordinator import KickoffCoordinator
 from objects.commands import AddTask, Command
 from objects.events import Event, TaskCompletion
 from objects.environment import environment_for, Environment
+from repositories.helpers.helpers import mark_complete
 from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
 
 def task_completion_handler(env: Environment, task_completion: TaskCompletion):
-    coordinator_repo = env.coordinator_repository
+    task_repo, coordinator_repo = env.task_repository, env.coordinator_repository
+    mark_complete(task_repo, task_completion.task.uuid)
     coordinators = coordinator_repo.check_task_by_uuid(task_completion.task.uuid)
     results = []
     for coordinator in coordinators:
