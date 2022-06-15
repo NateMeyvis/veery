@@ -18,9 +18,27 @@ def env(test_env, tasks):
     return test_env
 
 
-def test_task_completion_with_coordinator(env, tasks):
-    # Tasks 0 and 1 are the tasks with coordinators
+@pytest.fixture
+def env_after_completion(env, tasks):
     completion_time = datetime.now() - timedelta(seconds=1)
-    for task in tasks[0:1]:
-        event = TaskCompletion(task, completion_time)
-        handler(env, event)
+    task_with_coordinator = tasks[1]
+    event = TaskCompletion(task_with_coordinator, completion_time)
+    handler(env, event)
+    return env
+
+def test_still_three_tasks(env_after_completion, tasks):
+    new_tasks = env_after_completion.task_repository.get_all_tasks()
+    assert len(new_tasks) == len(tasks)
+
+def test_replacement_with_same_description(env_after_completion, tasks):
+    new_tasks = env_after_completion.task_repository.get_all_tasks()
+    descriptions = set([task.description for task in new_tasks])
+    original_descriptions = set([task.description for task in tasks])
+    assert descriptions == original_descriptions
+
+def test_uuid_updating(env_after_completion, tasks):
+    new_tasks = env_after_completion.task_repository.get_all_tasks()
+    new_uuids = set([task.uuid for task in new_tasks])
+    original_uuids = set([task.uuid for task in tasks])
+    assert tasks[1].uuid in new_uuids
+    assert tasks[2].uuid in new_uuids
