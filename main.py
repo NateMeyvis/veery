@@ -16,14 +16,6 @@ from repositories.coordinator_repository import SQLiteCoordinatorRepository
 from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
 
-def environment_for(env) -> Environment:
-    if env == "main":
-        return Environment(
-            task_repository=SQLiteTaskRepository("tasks.db"),
-            coordinator_repository=SQLiteCoordinatorRepository("tasks.db"),
-        )
-    raise ValueError(f"{env} is not an environment")
-
 
 @route("/<env>/")
 def list_tasks(env: str):
