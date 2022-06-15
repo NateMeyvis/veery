@@ -5,10 +5,8 @@ from repositories.coordinator_repository import SQLiteCoordinatorRepository
 
 
 @pytest.fixture
-def repo():
-    repo = SQLiteCoordinatorRepository(":memory:")
-    repo.connection.execute(SQLiteCoordinatorRepository.CREATE_SCHEMA)
-    yield repo
+def repo(in_memory_coordinator_repo):
+    yield in_memory_coordinator_repo
 
 
 def test_repo_smoke(repo):

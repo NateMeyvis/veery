@@ -16,7 +16,6 @@ from repositories.coordinator_repository import SQLiteCoordinatorRepository
 from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
 
-
 @route("/<env>/")
 def list_tasks(env: str):
     task_repo = environment_for(env).task_repository
@@ -60,7 +59,7 @@ def proc_add_task(env: str):
         task=Task(description=description, due=due),
         reschedule_interval=reschedule_interval,
     )
-    handler(env, command)
+    handler(environment_for(env), command)
     redirect(f"/{env}/add")
 
 
@@ -70,7 +69,7 @@ def proc_complete_task(env: str, uuid_str: str):
     mark_complete(task_repo, UUID(uuid_str))
     task = task_repo.retrieve_task_by_uuid(UUID(uuid_str))
     event = TaskCompletion(task, datetime.now())
-    handler(env, event)
+    handler(environment_for(env), event)
     redirect(f"/{env}/add")
 
 

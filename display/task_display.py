@@ -70,12 +70,12 @@ def task_ordered_list(env: str, tasks: List[Task]) -> str:
 
 
 def add_task_form(env) -> str:
-    return f"""<form action="/{env}/add" method="post">
-        Description: <input type="text" name="description" />
+    return f"""<form action='/{env}/add' method='post'>
+        Description: <input type='text' name='description' />
         <br>
-        Due date (leave blank for None): <input type="datetime-local" name="due" />
+        Due date (leave blank for None): <input type='datetime-local' name='due' />
         <br>
-        Repeat how many days after completion? (Leave blank for None.) <input type="number" name="reschedule_interval" />
+        Repeat how many days after completion? (Leave blank for None.) <input type='number' name='reschedule_interval' />
         <input type='submit' value='Add task' />
     </form>"""
 
@@ -93,7 +93,7 @@ def task_display(env: str, tasks: List[Task]) -> str:
             <div class='main-task'>
                 {task_ordered_list(env, tasks)}
                 <br>
-                {add_task_form({env})}
+                {add_task_form(env)}
             </div>
         </body>
         </html>
