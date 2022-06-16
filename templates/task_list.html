@@ -1,0 +1,34 @@
+<html>
+<head>
+    <title>Veery</title>
+    <link href='http://fonts.googleapis.com/css?family=Work+Sans' rel='stylesheet' type='text/css'>
+</head>
+<body>
+    <div class='main-task'>
+        <ol class='task-list'>
+        {% for task in tasks %}
+            <li>
+            <div class='task' id='task-{{ task.uuid.hex }}'>
+                <form class='completion button' action='/{{ env }}/complete/{{ task.uuid.hex }}' method='post'>
+                <label for='Mark {{ task.uuid.hex }} complete'>{{ task }}</label>
+                <input type='submit' id='Mark {{ task.uuid.hex }} complete' value='Mark complete' />
+                </form>
+                <form class='kick button' action='/{{ env }}/kick/{{ task.uuid.hex }}' method='post'>
+                <input type='submit' id='Kick {{ task.uuid.hex }}' value='Kick' />
+                </form>
+            </div>
+            </li>
+        {% endfor %}
+        </ol>
+        <br>
+        <form action='/{env}/add' method='post'>
+            Description: <input type='text' name='description' />
+            <br>
+            Due date (leave blank for None): <input type='datetime-local' name='due' />
+            <br>
+            Repeat how many days after completion? (Leave blank for None.) <input type='number' name='reschedule_interval' />
+            <input type='submit' value='Add task' />
+        </form>
+    </div>
+</body>
+</html>

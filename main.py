@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Union
 from uuid import UUID
 
-from bottle import redirect, request, route, run
+from bottle import jinja2_view, redirect, request, route, run
 
 from display.task_display import task_display
 from objects.task import CompletionStatus, Task
@@ -39,6 +39,16 @@ def add_task(env: str):
         ],
     )
 
+@route("/<env>/add_jinja")
+@jinja2_view("templates/task_list.html")
+def add_task(env: str):
+    task_repo = environment_for(env).task_repository
+    tasks = [
+        task
+        for task in task_repo.get_all_tasks()
+        if task.status == CompletionStatus.OUTSTANDING
+    ]
+    return {'tasks' : tasks}
 
 @route("/<env>/add", method="POST")
 def proc_add_task(env: str):
