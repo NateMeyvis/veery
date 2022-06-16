@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Union
 from uuid import UUID
 
-from bottle import jinja2_view, redirect, request, route, run
+from bottle import jinja2_view, redirect, request, route, run, static_file
 
 from display.task_display import task_display
 from objects.task import CompletionStatus, Task
@@ -15,6 +15,9 @@ from objects.handlers import handler, task_completion_handler, task_adder
 from repositories.coordinator_repository import SQLiteCoordinatorRepository
 from repositories.task_repository import TaskRepository, SQLiteTaskRepository
 
+@route("/base_css/")
+def base_css():
+    return static_file("base.css", root="static/")
 
 @route("/<env>/")
 def list_tasks(env: str):
@@ -39,6 +42,7 @@ def add_task(env: str):
         ],
     )
 
+
 @route("/<env>/add_jinja")
 @jinja2_view("templates/task_list.html")
 def add_task(env: str):
@@ -48,7 +52,8 @@ def add_task(env: str):
         for task in task_repo.get_all_tasks()
         if task.status == CompletionStatus.OUTSTANDING
     ]
-    return {'tasks' : tasks}
+    return {"tasks": tasks}
+
 
 @route("/<env>/add", method="POST")
 def proc_add_task(env: str):
