@@ -22,7 +22,7 @@
         {% endfor %}
         </ol>
         <br>
-        <form action='/{env}/add' method='post'>
+        <form action='/{{ env }}/add' method='post'>
             Description: <input type='text' name='description' />
             <br>
             Due date (leave blank for None): <input type='datetime-local' name='due' />

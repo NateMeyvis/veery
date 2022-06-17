@@ -4,7 +4,6 @@ from uuid import UUID
 
 from bottle import jinja2_view, redirect, request, route, run, static_file
 
-from display.task_display import task_display
 from objects.task import CompletionStatus, Task
 from repositories.helpers.helpers import mark_complete
 from objects.coordinator import KickoffCoordinator
@@ -22,28 +21,15 @@ def base_css():
 @route("/<env>/")
 def list_tasks(env):
     task_repo = environment_for(env).task_repository
-    active = [
+    tasks = [
         task
         for task in task_repo.get_all_tasks()
         if task.status == CompletionStatus.OUTSTANDING
     ]
-    return task_display(env, active)
+    return {"env": env, "tasks": tasks}
 
 
 @route("/<env>/add")
-def add_task(env):
-    task_repo = environment_for(env).task_repository
-    return task_display(
-        env,
-        [
-            task
-            for task in task_repo.get_all_tasks()
-            if task.status == CompletionStatus.OUTSTANDING
-        ],
-    )
-
-
-@route("/<env>/add_jinja")
 @jinja2_view("templates/task_list.html")
 def add_task(env):
     task_repo = environment_for(env).task_repository
@@ -52,7 +38,7 @@ def add_task(env):
         for task in task_repo.get_all_tasks()
         if task.status == CompletionStatus.OUTSTANDING
     ]
-    return {"tasks": tasks}
+    return {"env": env, "tasks": tasks}
 
 
 @route("/<env>/add", method="POST")
