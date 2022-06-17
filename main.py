@@ -20,7 +20,7 @@ def base_css():
     return static_file("base.css", root="static/")
 
 @route("/<env>/")
-def list_tasks(env: str):
+def list_tasks(env):
     task_repo = environment_for(env).task_repository
     active = [
         task
@@ -31,7 +31,7 @@ def list_tasks(env: str):
 
 
 @route("/<env>/add")
-def add_task(env: str):
+def add_task(env):
     task_repo = environment_for(env).task_repository
     return task_display(
         env,
@@ -45,7 +45,7 @@ def add_task(env: str):
 
 @route("/<env>/add_jinja")
 @jinja2_view("templates/task_list.html")
-def add_task(env: str):
+def add_task(env):
     task_repo = environment_for(env).task_repository
     tasks = [
         task
@@ -56,7 +56,7 @@ def add_task(env: str):
 
 
 @route("/<env>/add", method="POST")
-def proc_add_task(env: str):
+def proc_add_task(env):
     task_repo = environment_for(env).task_repository
     description = request.forms.get("description")
     due = (
